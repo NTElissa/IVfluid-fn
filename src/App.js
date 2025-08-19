@@ -1,8 +1,8 @@
 import React from "react";
 import { Routes, Route } from "react-router-dom";
 import Navbar from "./components/Navbar";
-import Home from "./pages/Home";
-import Dashboard from "./pages/Dashboard";
+import Home from "./pages/HomePage";
+import Dashboard from "./pages/DashboardPage";
 import Login from "./components/Login";
 import Register from "./components/Register";
 import Profile from "./components/Profile";
