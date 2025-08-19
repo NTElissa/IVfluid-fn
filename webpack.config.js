@@ -1,32 +1,38 @@
-const path = require('path');
+const path = require("path");
 
 module.exports = {
-  mode: 'development', // remove the warning
-  entry: './src/index.js',
+  entry: "./src/index.js",
   output: {
-    filename: 'main.js',
-    path: path.resolve(__dirname, 'dist'),
+    filename: "bundle.js",           // name of the bundle
+    path: path.resolve(__dirname, "dist"),
+    publicPath: "/",                 // important for dev server & React Router
+  },
+  mode: "development",
+  devServer: {
+    static: path.join(__dirname, "public"),
+    historyApiFallback: true,        // for React Router
+    port: 5000,
+    hot: true,
   },
   module: {
     rules: [
       {
-        test: /\.js$/,
+        test: /\.(js|jsx)$/,
         exclude: /node_modules/,
         use: {
-          loader: 'babel-loader',
+          loader: "babel-loader",
           options: {
-            presets: [
-              ["@babel/preset-env", { "modules": "commonjs" }]
-            ]
-          }
-        }
-      }
-    ]
+            presets: ["@babel/preset-env", "@babel/preset-react"],
+          },
+        },
+      },
+      {
+        test: /\.css$/i,
+        use: ["style-loader", "css-loader"],
+      },
+    ],
   },
-  devServer: {
-    static: path.resolve(__dirname, 'dist'),
-    port: 3000,
-    open: true, // opens browser automatically
-    hot: true   // enables hot reloading
-  }
+  resolve: {
+    extensions: [".js", ".jsx"],
+  },
 };
