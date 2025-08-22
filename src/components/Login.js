@@ -9,8 +9,9 @@ import {
   ArrowRight,
   ArrowLeft
 } from 'lucide-react';
+import { authAPI } from '../services/api';
 
-const LoginPage = ({ onLogin, onGoToRegister, onBack, mockUsers }) => {
+const Login = ({ onLogin, onBack }) => {
   const navigate = useNavigate();
   
   const [showPassword, setShowPassword] = useState(false);
@@ -181,24 +182,19 @@ const LoginPage = ({ onLogin, onGoToRegister, onBack, mockUsers }) => {
       fontSize: '14px',
       margin: 0
     },
-    demoCredentials: {
-      backgroundColor: '#f0f9ff',
-      border: '1px solid #e0f2fe',
+    successMessage: {
+      backgroundColor: '#dcfce7',
+      border: '1px solid #bbf7d0',
       borderRadius: '8px',
       padding: '12px',
-      marginBottom: '24px'
+      marginBottom: '16px'
     },
-    demoTitle: {
-      fontSize: '14px',
-      fontWeight: '600',
-      color: '#0369a1',
-      marginBottom: '8px',
-      margin: 0
-    },
-    demoText: {
-      fontSize: '12px',
-      color: '#0369a1',
-      margin: 0
+    errorMessage: {
+      backgroundColor: '#fef2f2',
+      border: '1px solid #fecaca',
+      borderRadius: '8px',
+      padding: '12px',
+      marginBottom: '16px'
     }
   };
 
@@ -213,8 +209,6 @@ const LoginPage = ({ onLogin, onGoToRegister, onBack, mockUsers }) => {
     
     if (!loginForm.password) {
       newErrors.password = 'Password is required';
-    } else if (loginForm.password.length < 6) {
-      newErrors.password = 'Password must be at least 6 characters';
     }
     
     setErrors(newErrors);
@@ -227,29 +221,42 @@ const LoginPage = ({ onLogin, onGoToRegister, onBack, mockUsers }) => {
     if (!validateLoginForm()) return;
     
     setIsLoading(true);
+    setErrors({});
     
-    // Simulate API call
-    setTimeout(() => {
-      const foundUser = mockUsers.find(
-        user => user.email === loginForm.email && user.password === loginForm.password
-      );
-      
-      // if (foundUser) {
-      //   onLogin(foundUser);
-      //   setErrors({});
-      // } else {
-      //   setErrors({ general: 'Invalid email or password' });
-      // }
-      if (foundUser) {
-  onLogin(foundUser);
-  setErrors({});
-  navigate('/dashboard'); // Redirect to dashboard page
-} else {
-  setErrors({ general: 'Invalid email or password' });
-}
+    try {
+      const response = await authAPI.login({
+        email: loginForm.email,
+        password: loginForm.password
+      });
 
+      if (response.success) {
+        // Store token and user data
+        localStorage.setItem('token', response.data.token);
+        localStorage.setItem('user', JSON.stringify(response.data));
+        
+        // Call onLogin callback if provided
+        if (onLogin) {
+          onLogin(response.data);
+        }
+        
+        // Navigate to dashboard
+        navigate('/dashboard');
+      } else {
+        setErrors({ general: response.message || 'Login failed' });
+      }
+    } catch (error) {
+      console.error('Login error:', error);
+      
+      if (error.response?.data?.message) {
+        setErrors({ general: error.response.data.message });
+      } else if (error.response?.status === 401) {
+        setErrors({ general: 'Invalid email or password' });
+      } else {
+        setErrors({ general: 'Network error. Please check your connection and try again.' });
+      }
+    } finally {
       setIsLoading(false);
-    }, 1500);
+    }
   };
 
   return (
@@ -283,98 +290,92 @@ const LoginPage = ({ onLogin, onGoToRegister, onBack, mockUsers }) => {
 
         <div style={styles.form}>
           {errors.general && (
-            <div style={{ marginBottom: '16px', padding: '12px', backgroundColor: '#fef2f2', borderRadius: '8px', border: '1px solid #fecaca' }}>
+            <div style={styles.errorMessage}>
               <p style={styles.error}>{errors.general}</p>
             </div>
           )}
-
-          <div style={styles.demoCredentials}>
-            <p style={styles.demoTitle}>Demo Credentials</p>
-            <p style={styles.demoText}>Email: dr.jean@chuk.rw</p>
-            <p style={styles.demoText}>Password: password123</p>
-          </div>
           
-          <div style={styles.formGroup}>
-            <label style={styles.label}>Email Address</label>
-            <div style={styles.inputContainer}>
-              <Mail size={20} style={styles.inputIcon} />
-              <input
-                type="email"
-                style={{
-                  ...styles.input,
-                  ...styles.inputWithIcon,
-                  borderColor: errors.email ? '#ef4444' : '#e5e7eb'
-                }}
-                placeholder="doctor@hospital.rw"
-                value={loginForm.email}
-                onChange={(e) => setLoginForm({...loginForm, email: e.target.value})}
-              />
-            </div>
-            {errors.email && <p style={styles.error}>{errors.email}</p>}
-          </div>
-
-          <div style={styles.formGroup}>
-            <label style={styles.label}>Password</label>
-            <div style={styles.inputContainer}>
-              <Lock size={20} style={styles.inputIcon} />
-              <input
-                type={showPassword ? 'text' : 'password'}
-                style={{
-                  ...styles.input,
-                  ...styles.inputWithIcon,
-                  paddingRight: '44px',
-                  borderColor: errors.password ? '#ef4444' : '#e5e7eb'
-                }}
-                placeholder="Enter your password"
-                value={loginForm.password}
-                onChange={(e) => setLoginForm({...loginForm, password: e.target.value})}
-              />
-              <div style={styles.eyeIcon} onClick={() => setShowPassword(!showPassword)}>
-                {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+          <form onSubmit={handleLogin}>
+            <div style={styles.formGroup}>
+              <label style={styles.label}>Email Address</label>
+              <div style={styles.inputContainer}>
+                <Mail size={20} style={styles.inputIcon} />
+                <input
+                  type="email"
+                  style={{
+                    ...styles.input,
+                    ...styles.inputWithIcon,
+                    borderColor: errors.email ? '#ef4444' : '#e5e7eb'
+                  }}
+                  placeholder="doctor@hospital.rw"
+                  value={loginForm.email}
+                  onChange={(e) => setLoginForm({...loginForm, email: e.target.value})}
+                  disabled={isLoading}
+                />
               </div>
+              {errors.email && <p style={styles.error}>{errors.email}</p>}
             </div>
-            {errors.password && <p style={styles.error}>{errors.password}</p>}
-          </div>
 
-          <button
-            type="button"
-            style={{
-              ...styles.button,
-              ...(isLoading ? styles.buttonDisabled : {})
-            }}
-            disabled={isLoading}
-            onClick={handleLogin}
-          >
-            {isLoading ? (
-              <>
-                <div style={{
-                  width: '20px',
-                  height: '20px',
-                  border: '2px solid #ffffff40',
-                  borderTop: '2px solid #ffffff',
-                  borderRadius: '50%',
-                  animation: 'spin 1s linear infinite'
-                }} />
-                <span>Signing In...</span>
-              </>
-            ) : (
-              <>
-                <span>Sign In to Dashboard</span>
-                <ArrowRight size={20} />
-              </>
-            )}
-          </button>
+            <div style={styles.formGroup}>
+              <label style={styles.label}>Password</label>
+              <div style={styles.inputContainer}>
+                <Lock size={20} style={styles.inputIcon} />
+                <input
+                  type={showPassword ? 'text' : 'password'}
+                  style={{
+                    ...styles.input,
+                    ...styles.inputWithIcon,
+                    paddingRight: '44px',
+                    borderColor: errors.password ? '#ef4444' : '#e5e7eb'
+                  }}
+                  placeholder="Enter your password"
+                  value={loginForm.password}
+                  onChange={(e) => setLoginForm({...loginForm, password: e.target.value})}
+                  disabled={isLoading}
+                />
+                <div style={styles.eyeIcon} onClick={() => setShowPassword(!showPassword)}>
+                  {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+                </div>
+              </div>
+              {errors.password && <p style={styles.error}>{errors.password}</p>}
+            </div>
+
+            <button
+              type="submit"
+              style={{
+                ...styles.button,
+                ...(isLoading ? styles.buttonDisabled : {})
+              }}
+              disabled={isLoading}
+            >
+              {isLoading ? (
+                <>
+                  <div style={{
+                    width: '20px',
+                    height: '20px',
+                    border: '2px solid #ffffff40',
+                    borderTop: '2px solid #ffffff',
+                    borderRadius: '50%',
+                    animation: 'spin 1s linear infinite'
+                  }} />
+                  <span>Signing In...</span>
+                </>
+              ) : (
+                <>
+                  <span>Sign In to Dashboard</span>
+                  <ArrowRight size={20} />
+                </>
+              )}
+            </button>
+          </form>
         </div>
 
         <div style={styles.footer}>
           <p style={styles.footerText}>
             Don't have an account? {' '}
-            {/* <button style={styles.linkButton} onClick={onGoToRegister}>
+            <button style={styles.linkButton} onClick={() => navigate('/register')}>
               Sign up here
-            </button> */}
-
-            <button   style={styles.linkButton}  onClick={() => navigate('/register')}>Sign up here</button>
-
+            </button>
           </p>
         </div>
       </div>
@@ -389,4 +390,4 @@ const LoginPage = ({ onLogin, onGoToRegister, onBack, mockUsers }) => {
   );
 };
 
-export default LoginPage;
+export default Login;
