@@ -6,6 +6,8 @@ import Dashboard from "./pages/DashboardPage";
 import Login from "./components/Login";
 import Register from "./components/Register";
 import Profile from "./components/Profile";
+// import './App.css';
+import IVRegistration from "./pages/IVRegistrationPage";
 
 
 
@@ -19,6 +21,8 @@ function App() {
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
         <Route path="/profile" element={<Profile />} />
+        <Route path="/iv-registration" element={<IVRegistration />} />
+        <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </>
   );
