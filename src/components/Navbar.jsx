@@ -1,130 +1,86 @@
-import React, { useState } from "react";
-import { Link } from "react-router-dom";
-import { Bell, User, Menu, X } from "lucide-react";
+import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { Heart } from 'lucide-react';
 
 const Navbar = () => {
+  const navigate = useNavigate();
   const [isOpen, setIsOpen] = useState(false);
 
-  const styles = {
-    navContainer: {
-      display: "flex",
-      justifyContent: "space-between",
-      alignItems: "center",
-      padding: "16px 24px",
-      backgroundColor: "#2563eb", // Blue background
-      color: "#fff",
-      flexWrap: "wrap",
-    },
-    logo: {
-      display: "flex",
-      alignItems: "center",
-      gap: "8px",
-      fontWeight: "bold",
-      fontSize: "20px",
-      color: "#fff",
-    },
-    navLinks: {
-      display: "flex",
-      alignItems: "center",
-      gap: "24px",
-    },
-    link: {
-      textDecoration: "none",
-      color: "#fff",
-      fontWeight: "500",
-      fontSize: "14px",
-      padding: "8px 0",
-      borderBottom: "2px solid transparent",
-      transition: "all 0.3s",
-    },
-    activeLink: {
-      borderBottom: "2px solid #fff",
-    },
-    userSection: {
-      display: "flex",
-      alignItems: "center",
-      gap: "12px",
-    },
-    userAvatar: {
-      width: "32px",
-      height: "32px",
-      borderRadius: "50%",
-      backgroundColor: "#1e40af", // Darker blue circle
-      display: "flex",
-      alignItems: "center",
-      justifyContent: "center",
-    },
-    mobileMenuButton: {
-      display: "none",
-      cursor: "pointer",
-    },
-    mobileNavLinks: {
-      display: isOpen ? "flex" : "none",
-      flexDirection: "column",
-      width: "100%",
-      marginTop: "12px",
-      gap: "12px",
-    },
-  };
-
   return (
-    <nav style={styles.navContainer}>
-      <div style={styles.logo}>IV Fluid App</div>
-
-      {/* Desktop Links */}
-      <div style={{ ...styles.navLinks, flex: 1, justifyContent: "center" }} className="desktop-links">
-        <Link to="/" style={{ ...styles.link, ...styles.activeLink }}>
-          Home
-        </Link>
-        <Link to="/dashboard" style={styles.link}>
-          Dashboard
-        </Link>
-      </div>
-
-      <div style={styles.userSection}>
-        <Bell size={20} color="#fff" />
-        <div style={styles.userAvatar}>
-          <User size={20} color="#fff" />
+    <header className="fixed top-0 left-0 right-0 bg-slate-900/95 backdrop-blur-md border-b border-slate-800/50 z-50 py-4">
+      <div className="max-w-[1200px] mx-auto px-6 flex justify-between items-center">
+        {/* Logo */}
+        <div className="flex items-center gap-3 cursor-pointer" onClick={() => navigate('/')}>
+          <Heart size={32} className="text-blue-500" />
+          <div>
+            <h1 className="text-white text-2xl font-bold">SmartIV Monitor</h1>
+            <p className="text-slate-400 text-xs">Rwanda Healthcare Network</p>
+          </div>
         </div>
-        {/* Hamburger button for mobile */}
-        <div
-          style={styles.mobileMenuButton}
-          className="mobile-menu-button"
-          onClick={() => setIsOpen(!isOpen)}
-        >
-          {isOpen ? <X size={24} /> : <Menu size={24} />}
+
+        {/* Desktop Links */}
+        <nav className="hidden md:flex items-center gap-8">
+          <a href="#home" className="text-slate-300 font-medium hover:text-blue-500 transition">
+            Home
+          </a>
+          <a href="#features" className="text-slate-300 font-medium hover:text-blue-500 transition">
+            Features
+          </a>
+          <a href="#benefits" className="text-slate-300 font-medium hover:text-blue-500 transition">
+            Benefits
+          </a>
+          <a href="#about" className="text-slate-300 font-medium hover:text-blue-500 transition">
+            About
+          </a>
+          <a href="#contact" className="text-slate-300 font-medium hover:text-blue-500 transition">
+            Contact
+          </a>
+          <button
+            className="bg-blue-500 text-white px-4 py-2 rounded-lg font-semibold hover:bg-blue-600 transition"
+            onClick={() => navigate('/login')}
+          >
+            Access Dashboard
+          </button>
+        </nav>
+
+        {/* Mobile Hamburger */}
+        <div className="md:hidden">
+          <button
+            onClick={() => setIsOpen(!isOpen)}
+            className="text-slate-300 focus:outline-none text-2xl"
+          >
+            {isOpen ? '✕' : '☰'}
+          </button>
         </div>
       </div>
 
-      {/* Mobile Links */}
-      <div style={styles.mobileNavLinks} className="mobile-links">
-        <Link to="/" style={{ ...styles.link, ...styles.activeLink }} onClick={() => setIsOpen(false)}>
-          Home
-        </Link>
-        <Link to="/dashboard" style={styles.link} onClick={() => setIsOpen(false)}>
-          Dashboard
-        </Link>
-      </div>
-
-      {/* Responsive styles */}
-      <style>
-        {`
-          @media (max-width: 768px) {
-            .desktop-links {
-              display: none;
-            }
-            .mobile-menu-button {
-              display: flex !important;
-            }
-          }
-          @media (min-width: 769px) {
-            .mobile-links {
-              display: none !important;
-            }
-          }
-        `}
-      </style>
-    </nav>
+      {/* Mobile Menu */}
+      {isOpen && (
+        <div className="md:hidden mt-2 px-6 flex flex-col gap-4 bg-slate-900/95 backdrop-blur-md border-t border-slate-800/50 pb-4">
+          <a href="#home" className="text-slate-300 font-medium hover:text-blue-500 transition">
+            Home
+          </a>
+          <a href="#features" className="text-slate-300 font-medium hover:text-blue-500 transition">
+            Features
+          </a>
+          <a href="#benefits" className="text-slate-300 font-medium hover:text-blue-500 transition">
+            Benefits
+          </a>
+          <a href="#about" className="text-slate-300 font-medium hover:text-blue-500 transition">
+            About
+          </a>
+          <a href="#contact" className="text-slate-300 font-medium hover:text-blue-500 transition">
+            Contact
+          </a>
+          <button
+            className="bg-blue-500 text-white px-4 py-2 rounded-lg font-semibold hover:bg-blue-600 transition"
+            onClick={() => navigate('/login')}
+          >
+            Access Dashboard
+          </button>
+        </div>
+      )}
+    </header>
   );
 };
 

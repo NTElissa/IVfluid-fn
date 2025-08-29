@@ -1,72 +1,60 @@
 import React from "react";
- import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import { Routes, Route, Navigate } from "react-router-dom";
 import Navbar from "./components/Navbar";
 import Home from "./pages/HomePage";
 import Dashboard from "./pages/DashboardPage";
 import Login from "./components/Login";
 import Register from "./components/Register";
 import Profile from "./components/Profile";
-// import './App.css';
 import IVRegistration from "./pages/IVRegistrationPage";
-
-
+import { AuthProvider } from "./context/AuthContext";
+import ProtectedRoute from "./components/ProtectedRoute";
+import { Toaster } from "react-hot-toast";   // ✅ add this
 
 function App() {
   return (
-    <>
+    <AuthProvider>
       <Navbar />
       <Routes>
+        {/* Public Routes */}
         <Route path="/" element={<Home />} />
-        <Route path="/dashboard" element={<Dashboard />} />
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
-        <Route path="/profile" element={<Profile />} />
-        <Route path="/iv-registration" element={<IVRegistration />} />
+
+        {/* Protected Routes */}
+        <Route
+          path="/dashboard"
+          element={
+            <ProtectedRoute>
+              <Dashboard />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/profile"
+          element={
+            <ProtectedRoute>
+              <Profile />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/iv-registration"
+          element={
+            <ProtectedRoute>
+              <IVRegistration />
+            </ProtectedRoute>
+          }
+        />
+
+        {/* Catch-all redirect */}
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
-    </>
+
+      {/* ✅ Toast container */}
+      <Toaster position="top-right" reverseOrder={false} />
+    </AuthProvider>
   );
 }
 
 export default App;
-
-
-
-// import React from 'react';
-// import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
-// import { AuthProvider } from './context/AuthContext';
-// import ProtectedRoute from './components/ProtectedRoute';
-// import HomePage from './pages/HomePage';
-// import Login from './components/Login';
-// import Register from './components/Register';
-// import DashboardPage from './pages/DashboardPage';
-
-// const App = () => {
-//   return (
-//     <AuthProvider>
-//       <Router>
-//         <Routes>
-//           {/* Public Routes */}
-//           <Route path="/" element={<HomePage />} />
-//           <Route path="/login" element={<Login />} />
-//           <Route path="/register" element={<Register />} />
-          
-//           {/* Protected Routes */}
-//           <Route 
-//             path="/dashboard" 
-//             element={
-//               <ProtectedRoute>
-//                 <DashboardPage />
-//               </ProtectedRoute>
-//             } 
-//           />
-          
-//           {/* Redirect any unknown routes to home */}
-//           <Route path="*" element={<Navigate to="/" replace />} />
-//         </Routes>
-//       </Router>
-//     </AuthProvider>
-//   );
-// };
-
-// export default App;

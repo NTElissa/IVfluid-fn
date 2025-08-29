@@ -12,7 +12,7 @@ import {
 import Header from "../components/Header";
 
 const Dashboard = () => {
-  const navigate = useNavigate();
+ const navigate = useNavigate();
   const location = useLocation();
   const [currentTime, setCurrentTime] = useState(new Date());
   const [activeTab, setActiveTab] = useState("live");
