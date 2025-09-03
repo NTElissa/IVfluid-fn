@@ -57,7 +57,9 @@ export const authAPI = {
   updateProfile: async (userData) => {
     const response = await api.put('/auth/profile', userData);
     return response.data;
-  }
+  },
+
+  
 };
 
 export default api;
